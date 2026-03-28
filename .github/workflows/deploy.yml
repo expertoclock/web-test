@@ -19,7 +19,7 @@ jobs:
       - name: Run Docker Container
         run: docker run -d -p 8080:80 --name web-container ecommerce-app:latest
 
-        - name: Validation and Testing
+      - name: Validation and Testing
         run: |
           echo "Waiting for container to start..."
           sleep 10
