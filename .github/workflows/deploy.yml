@@ -19,17 +19,23 @@ jobs:
       - name: Run Docker Container
         run: docker run -d -p 8080:80 --name web-container ecommerce-app:latest
 
-      - name: Validation and Testing
+        - name: Validation and Testing
         run: |
           echo "Waiting for container to start..."
-          sleep 5
+          sleep 10
 
-          # Test if the application responds on the specific port with HTTP 200
+          # 1. Get the HTTP status code.
+          # Ensure this port (8080) matches your 'docker run -p' port!
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080)
 
-          if[ "$HTTP_STATUS" -eq 200 ]; then
-            echo "SUCCESS: Application is running correctly on port 8080 (Status: $HTTP_STATUS)"
+          echo "Status received: $HTTP_STATUS"
+
+          # 2. Check the status (Note the spaces around the brackets!)
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "SUCCESS: Application is running correctly (Status: $HTTP_STATUS)"
           else
-            echo "FAILED: Application did not return 200 OK."
+            echo "FAILED: Application returned $HTTP_STATUS instead of 200."
+            # Show container logs to help debug if it fails
+            docker logs web-container
             exit 1
           fi
