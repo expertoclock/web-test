@@ -1,0 +1,36 @@
+---
+- name: Setup local environment
+  hosts: local
+  become: yes
+  tasks:
+    - name: Ensure Git is installed
+      package:
+        name: git
+        state: present
+
+    # 1. Check if Docker is already installed to avoid breaking existing setups
+    - name: Check if Docker is already installed
+      command: which docker
+      register: docker_check
+      ignore_errors: yes
+      changed_when: false
+
+    # 2. Download the official Docker install script (only if Docker is missing)
+    - name: Download Docker install script
+      get_url:
+        url: https://get.docker.com
+        dest: /tmp/get-docker.sh
+        mode: '0755'
+      when: docker_check.rc != 0
+
+    # 3. Run the script to install docker-ce properly (only if Docker is missing)
+    - name: Install Docker (Official Docker CE)
+      command: /tmp/get-docker.sh
+      when: docker_check.rc != 0
+
+    # 4. Ensure the service is up and running
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
